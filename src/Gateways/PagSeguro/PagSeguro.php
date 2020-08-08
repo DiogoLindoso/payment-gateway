@@ -3,57 +3,36 @@
 namespace BeerAndCodeTeam\PaymentGateway\Gateways\PagSeguro;
 
 use Illuminate\Support\Facades\Http;
+use BeerAndCodeTeam\PaymentGateway\Models\PagSeguroCharge;
 
 class PagSeguro extends PagSeguroBase
 {
 
-    function charge(array $values)
+    public function charge(PagSeguroCharge $chargeData)
     {
         $response = Http::withHeaders([
             $this->headers
         ])->post(
-            'https://sandbox.api.pagseguro.com/charges',
+            $this->baseUrl . 'charges',
             [
-                'reference_id' => 'ex-00001',
-                'description' => 'Celular',
-                'amount' => [
-                    'value' => 100000,
-                    'currency' => 'BRL'
-                ],
-                'payment_method' => [
-                    'type' => 'CREDIT_CARD',
-                    'installments' => 1,
-                    'capture' => true,
-                    'card' => [
-                        'number' => '4111111111111111',
-                        'exp_month' => '12',
-                        'exp_year' => '2026',
-                        'security_code' => '123',
-                        'holder' => [
-                            'name' => 'Silveirinha'
-                        ]
-                    ]
-                ],
-                'notification_urls' => [
-                    'https://yourserver.com/nas_ecommerce/277be731-3b7c-4dac-8c4e-4c3f4a1fdc46/'
-                ]
+                $chargeData->getChargeData()
             ]
         );
 
-        return $response->json();
+        return collect($response->json());
     }
     public function findCharge(string $chargeId)
     {
         $response = Http::withHeaders([
             $this->headers
-        ])->get('https://sandbox.api.pagseguro.com/charges/' . $chargeId,);
+        ])->get($this->baseUrl . 'charges/' . $chargeId,);
         return $response;
     }
-    public function refound(string $chargeId)
+    public function refound(string $chargeId, int $value)
     {
         $response = Http::withHeaders([
             $this->headers
-        ])->post('https://sandbox.api.pagseguro.com/charges/'.$chargeId.'/cancel', [
+        ])->post($this->baseUrl . $chargeId . '/cancel', [
             'amount' => [
                 'value' => 99500, // value for refund
                 'sumary' => [
