@@ -2,6 +2,8 @@
 
 namespace BeerAndCodeTeam\PaymentGateway\Gateways\PagSeguro;
 
+use BeerAndCodeTeam\PaymentGateway\Models\PagSeguroCharge;
+
 abstract class PagSeguroBase
 {
     /** @var String $token receives PAGSEGURO_TOKEN from .env */
@@ -13,13 +15,14 @@ abstract class PagSeguroBase
         'Authorization' => $this->token,
         'x-api-version' => '4.0',
     ];
+    protected $baseUrl = 'https://sandbox.api.pagseguro.com/';
     /**
      * Request in api point /charges using method POST
      *
-     * @param Array $Values Receives params for charge
+     * @param PagSeguroCharge $chargeData Receives params for charge
      * @return json
      **/
-    abstract function charge(array $values);
+    abstract function charge(PagSeguroCharge $chargeData);
 
     /**
      * Request in api point /charges/$chargeid using method GET
@@ -35,5 +38,5 @@ abstract class PagSeguroBase
      * @param String $chageId Receives id of charge PagSeguro
      * @return json
      **/
-    abstract function refound(String $chargeId);
+    abstract function refound(String $chargeId, int $value);
 }
